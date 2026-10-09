@@ -52,6 +52,7 @@ ul, ol { list-style: none }
   padding-block: 22px; border-bottom: 1px solid var(--ink) }
 .mast .mark { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; gap: 10px }
 .mast .mark::before { content: ""; width: 9px; height: 9px; background: var(--ink) }
+.mast .by { font: italic 400 15px/1 var(--display); letter-spacing: 0; text-transform: none; color: var(--muted); padding-left: 10px; border-left: 1px solid var(--line) }
 .mast-r { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px }
 #theme { font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
 #theme:hover { color: var(--ink) }
@@ -198,7 +199,7 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 <!--BODY-->
 <div class="sheet">
   <header class="mast">
-    <span class="mark">Internship Radar</span>
+    <span class="mark">Internship Radar<span class="by">von Andi</span></span>
     <div class="mast-r">
       <span class="cap" id="checked"></span>
       <button id="theme" type="button" aria-label="Darstellung wechseln"></button>
@@ -276,7 +277,7 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 
   <footer>
     <p>Die Daten stammen aus meinem eigenen Scan öffentlicher Karriereseiten und sind eine Momentaufnahme. „Gemerkt“ und „Beworben“ werden nur in diesem Browser gespeichert.</p>
-    <a class="lnk" href="https://github.com/andiyin/SWE-Internship-Scanner" target="_blank" rel="noopener">Quellcode auf GitHub ↗</a>
+    <span>Gebaut von Andi · <a class="lnk" href="https://github.com/andiyin/SWE-Internship-Scanner" target="_blank" rel="noopener">Quellcode auf GitHub ↗</a></span>
   </footer>
 </div>
 
