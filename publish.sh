@@ -11,10 +11,12 @@ if git diff --cached --quiet -- career_pages_full.csv; then
   exit 0
 fi
 git commit -q -m "Update data ($(date +%Y-%m-%d))" -- career_pages_full.csv || { log "commit failed"; exit 1; }
-if git push -q; then
+# pick up commits made elsewhere (e.g. edits on github.com) before pushing
+if git pull -q --rebase --autostash && git push -q; then
   log "published new CSV"
 else
   # undo the commit but keep the change staged, so the next run tries again
+  git rebase --abort 2> /dev/null
   git reset -q --soft HEAD~1
   log "push failed, will retry on the next run"
   exit 1
