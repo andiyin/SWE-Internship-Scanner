@@ -1,319 +1,514 @@
 <title>Internship Radar</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23131518'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23f3f3f0'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400..500&family=Instrument+Sans:wght@400..600&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&display=swap">
 <style>
-/* Layout: summary sentence on top, then the scan field (one dot per tracked company) beside the
-   location-priority ladder, then listings grouped by that ladder, then the full company register. */
+/* Layout: a 12-column sheet. Each section opens with a full-width rule; its title sits in the
+   left margin column, the content in the remaining nine. One accent, used for location priority. */
 :root {
-  --bg: #f2f4f9; --surface: #ffffff; --ink: #141a2b; --muted: #5a637b; --line: #dde2ec;
-  --accent: #4326d6; --dot: #cdd4e2; --new: #b4360f;
-  --t1: #4326d6; --t2: #1d74e0; --t3: #0b93a8; --t4: #189a62; --t5: #7a9a1e; --t0: #7b8499;
-  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
-  --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --paper: #f3f3f0; --surface: #fafaf8; --ink: #131518; --ink-2: #44474c; --muted: #707378;
+  --line: #d8d7d2; --accent: #1e3a8a;
+  --display: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --sans: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  /* location priority: one hue, fading with distance from Munich */
+  --l0: var(--accent);
+  --l1: color-mix(in oklab, var(--accent) 74%, var(--paper));
+  --l2: color-mix(in oklab, var(--accent) 56%, var(--paper));
+  --l3: color-mix(in oklab, var(--accent) 42%, var(--paper));
+  --l4: color-mix(in oklab, var(--accent) 30%, var(--paper));
+  --l5: var(--muted);
+  --gutter: clamp(20px, 5vw, 72px);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0e111a; --surface: #161a26; --ink: #e9ecf5; --muted: #99a2b9; --line: #272d3d;
-  --accent: #a79bff; --dot: #2c3346; --new: #ff9a6b;
-  --t1: #a79bff; --t2: #6fb0ff; --t3: #45cfe0; --t4: #4fd69a; --t5: #b7d45a; --t0: #7f889e;
-  color-scheme: dark } }
+  --paper: #0e0f10; --surface: #161718; --ink: #edece8; --ink-2: #c2c2be; --muted: #8b8c8d;
+  --line: #2b2c2d; --accent: #a8bcf2; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0e111a; --surface: #161a26; --ink: #e9ecf5; --muted: #99a2b9; --line: #272d3d;
-  --accent: #a79bff; --dot: #2c3346; --new: #ff9a6b;
-  --t1: #a79bff; --t2: #6fb0ff; --t3: #45cfe0; --t4: #4fd69a; --t5: #b7d45a; --t0: #7f889e;
-  color-scheme: dark }
+  --paper: #0e0f10; --surface: #161718; --ink: #edece8; --ink-2: #c2c2be; --muted: #8b8c8d;
+  --line: #2b2c2d; --accent: #a8bcf2; color-scheme: dark }
 
 *, *::before, *::after { box-sizing: border-box }
 [hidden] { display: none !important }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body) }
-.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 72px;
-  display: flex; flex-direction: column; gap: 44px }
-a { color: inherit }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px }
-.label { font: 500 11px/1.3 var(--mono); letter-spacing: .09em; text-transform: uppercase; color: var(--muted) }
-h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance }
-h2 { font-size: 22px; font-weight: 700 }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 15px/1.55 var(--sans);
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility }
+::selection { background: var(--ink); color: var(--paper) }
+a { color: inherit; text-decoration: none }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer }
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px }
+h1, h2, h3, p, dl, dd, ul, ol { margin: 0; padding: 0 }
+ul, ol { list-style: none }
 
-/* header */
-header { display: flex; flex-direction: column; gap: 14px }
-.topline { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px }
-h1 { font-size: clamp(30px, 5.2vw, 52px); line-height: 1.05; font-weight: 700; letter-spacing: -.02em; max-width: 18ch }
-h1 em { font-style: normal; color: var(--accent) }
-.facts { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 0; color: var(--muted) }
-.facts div { display: flex; gap: 8px; align-items: baseline }
-.facts dt { order: 2 }
-.facts dd { margin: 0; font: 500 17px var(--mono); color: var(--ink); font-variant-numeric: tabular-nums }
+.sheet { max-width: 1320px; margin: 0 auto; padding-inline: var(--gutter); padding-block: 0 96px }
+.cap { font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.num { font-variant-numeric: tabular-nums }
+.lnk { border-bottom: 1px solid var(--line); transition: border-color .15s }
+.lnk:hover { border-color: var(--ink) }
 
-/* overview */
-.overview { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 36px; align-items: start }
-.overview > section { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
-.field { display: grid; grid-template-columns: repeat(auto-fill, 16px); gap: 3px; padding: 16px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px }
-.dot { width: 16px; height: 16px; padding: 0; border: 0; background: none; display: grid; place-items: center; cursor: pointer }
-.dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot); transition: transform .12s }
-.dot.on::before { width: 14px; height: 14px; background: var(--c) }
-.dot:hover::before { transform: scale(1.35) }
-.dot.dim::before { opacity: .25 }
-.hint { color: var(--muted); font-size: 13px; margin: 0; min-height: 1.5em }
-.hint b { color: var(--ink); font-weight: 600 }
+/* masthead */
+.mast { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 24px;
+  padding-block: 22px; border-bottom: 1px solid var(--ink) }
+.mast .mark { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; display: flex; align-items: center; gap: 10px }
+.mast .mark::before { content: ""; width: 9px; height: 9px; background: var(--ink) }
+.mast-r { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px }
+#theme { font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+#theme:hover { color: var(--ink) }
 
-.ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px }
-.rung { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; text-align: left;
-  padding: 9px 10px; border: 1px solid transparent; border-radius: 8px; background: none; color: inherit; font: inherit; cursor: pointer }
-.rung:hover { background: var(--surface) }
-.rung[aria-pressed="true"] { background: var(--surface); border-color: var(--line) }
-.rung .name { font-weight: 500 }
-.rung .n { font: 500 15px var(--mono); font-variant-numeric: tabular-nums }
-.rung .track { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--line) }
-.rung .bar { display: block; height: 100%; border-radius: 3px; background: var(--c); min-width: 6px }
-.rung.zero { color: var(--muted) }
-.rung.zero .bar { display: none }
+/* hero */
+.hero { padding-block: clamp(56px, 10vw, 136px) clamp(48px, 7vw, 88px) }
+h1 { font: 300 clamp(2.5rem, 6.6vw, 6.25rem)/1.0 var(--display); letter-spacing: -.028em; max-width: 17ch; text-wrap: balance }
+h1 em { font-style: italic; color: var(--accent); padding-right: .04em }
+.figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px clamp(20px, 3vw, 48px) }
+.figs > div { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; justify-content: space-between }
+.figs dd { font: 300 clamp(2rem, 3.6vw, 3.25rem)/1 var(--display); letter-spacing: -.02em; font-variant-numeric: lining-nums tabular-nums }
+
+/* sections */
+.sec { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(20px, 3vw, 48px); row-gap: 28px;
+  margin-top: clamp(72px, 9vw, 136px); padding-top: 26px; border-top: 1px solid var(--ink) }
+.sec-head { grid-column: span 3; display: flex; flex-direction: column; gap: 12px; align-self: start }
+.sec-body { grid-column: span 9; min-width: 0 }
+.sec.wide .sec-head { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: baseline }
+.sec.wide .sec-body { grid-column: 1 / -1 }
+h2 { font: 400 clamp(1.5rem, 2.2vw, 2rem)/1.1 var(--display); letter-spacing: -.015em }
+.sec-head p { color: var(--muted); font-size: 14px; max-width: 34ch }
+
+/* scan field */
+.field { display: flex; flex-direction: column }
+.frow { display: grid; grid-template-columns: 48px 84px minmax(0, 1fr); gap: 0 16px; align-items: center;
+  padding-block: 15px; border-bottom: 1px solid var(--line) }
+.frow:first-child { border-top: 1px solid var(--line) }
+.grade { font: italic 400 22px/1 var(--display); letter-spacing: -.01em }
+.frow .of { font: 400 12px var(--mono); color: var(--muted) }
+.frow .of b { font-weight: 500; color: var(--ink) }
+.dots { display: flex; flex-wrap: wrap; gap: 4px }
+.dot { width: 11px; height: 11px; border: 1px solid var(--line); transition: opacity .2s, transform .12s }
+.dot.on { border-color: transparent; background: var(--c) }
+.dot:hover { transform: scale(1.35); border-color: var(--ink) }
+.dot.dim { opacity: .18 }
+.field-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; padding-top: 16px }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--ink-2) }
+.legend li { display: flex; align-items: center; gap: 8px }
+.sw { width: 9px; height: 9px; background: var(--c); flex: none; display: inline-block }
+.hint { font-size: 13px; color: var(--muted); min-height: 1.55em }
+.hint b { font-weight: 500; color: var(--ink) }
+
+/* change digest */
+.digest { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px clamp(20px, 3vw, 48px) }
+.digest > div { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 14px }
+.digest ul { display: flex; flex-wrap: wrap; gap: 4px 0; font: 400 18px/1.45 var(--display) }
+.digest li:not(:last-child)::after { content: ","; margin-right: .35em; color: var(--muted) }
+.digest li button:hover, .digest li a:hover { color: var(--accent) }
+.digest small { font: 400 12px var(--sans); color: var(--muted) }
+.digest .none { font-size: 14px; color: var(--muted) }
+
+/* filters */
+.filters { display: flex; flex-direction: column; border-top: 1px solid var(--line) }
+.fl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 8px 16px; align-items: center; padding-block: 12px; border-bottom: 1px solid var(--line) }
+.fl.top { grid-template-columns: minmax(0, 1fr) auto; padding-block: 6px }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font: 500 13px/1 var(--sans); padding: 8px 11px; border: 1px solid var(--line); border-radius: 2px; color: var(--ink-2);
+  display: inline-flex; align-items: center; gap: 8px; transition: border-color .15s, background .15s, color .15s }
+.chip:hover { border-color: var(--ink) }
+.chip .n { font: 400 11px var(--mono); color: var(--muted) }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper) }
+.chip[aria-pressed="true"] .n { color: inherit; opacity: .6 }
+.chip.zero { opacity: .38 }
+.search { width: 100%; min-width: 0; border: 0; background: none; color: var(--ink); font: 400 17px var(--display); padding: 12px 0; outline: none }
+.search::placeholder { color: var(--muted); opacity: 1 }
+.fl.top:focus-within { border-bottom-color: var(--ink) }
+.tabs { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px }
+.tab { font: 500 13px var(--sans); color: var(--muted); padding-block: 4px; border-bottom: 1px solid transparent }
+.tab:hover { color: var(--ink) }
+.tab[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink) }
+.summary { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: baseline; font-size: 14px; color: var(--muted) }
+.summary b { font-weight: 500; color: var(--ink) }
 
 /* listings */
-.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px }
-.listings, .group { display: flex; flex-direction: column }
-.listings { gap: 28px }
-.group h3 { display: flex; align-items: center; gap: 10px; font: 500 12px var(--mono); letter-spacing: .09em;
-  text-transform: uppercase; color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--line) }
-.swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none }
-.job { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 6px 24px; align-items: center;
-  padding: 16px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 20px }
-.job.flash { animation: flash 1.4s ease-out }
-@keyframes flash { from { background: color-mix(in srgb, var(--accent) 16%, transparent) } to { background: transparent } }
-.job .co { font: 700 19px/1.2 var(--display); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; overflow-wrap: anywhere }
-.badge { font: 500 10px var(--mono); letter-spacing: .08em; padding: 2px 6px; border-radius: 4px; color: var(--new); border: 1px solid currentColor }
-.job .role { min-width: 0 }
-.job .title { font-weight: 500; overflow-wrap: anywhere }
-.job .meta { color: var(--muted); font-size: 13px }
-.job .acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end }
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-weight: 500; font-size: 14px;
-  text-decoration: none; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); color: var(--ink) }
-.btn:hover { border-color: var(--ink) }
-.btn.go { background: var(--accent); border-color: var(--accent); color: var(--bg) }
-.btn.go:hover { filter: brightness(1.12) }
-.empty { color: var(--muted); padding: 24px 0; margin: 0 }
+.grp { display: flex; justify-content: space-between; align-items: baseline; padding: 44px 0 10px; border-bottom: 1px solid var(--ink) }
+.grp:first-child { padding-top: 28px }
+.grp .gname { display: flex; align-items: center; gap: 10px; color: var(--ink) }
+.job { display: grid; grid-template-columns: 44px minmax(0, 1.1fr) minmax(0, 1.7fr) minmax(0, .95fr) auto;
+  grid-template-areas: "g who role where acts"; gap: 6px clamp(16px, 2.4vw, 36px); align-items: start;
+  padding: 22px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 24px; transition: opacity .2s }
+.job > .grade { grid-area: g; padding-top: 3px }
+.who { grid-area: who; display: flex; flex-direction: column; gap: 6px; min-width: 0 }
+.co { font: 400 24px/1.12 var(--display); letter-spacing: -.012em; overflow-wrap: anywhere }
+.st { font: 500 10.5px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+.st.new { color: var(--accent) }
+.role { grid-area: role; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 4px }
+.role .t { font-weight: 500; line-height: 1.4; overflow-wrap: anywhere }
+.role .m, .where .m { font-size: 13px; color: var(--muted) }
+.where { grid-area: where; min-width: 0; display: flex; flex-direction: column; gap: 5px; padding-top: 4px; overflow-wrap: anywhere }
+.where .m { display: flex; align-items: center; gap: 8px }
+.acts { grid-area: acts; display: flex; align-items: center; gap: 6px; padding-top: 1px }
+.mk { font: 500 12px/1 var(--sans); padding: 8px 10px; border: 1px solid var(--line); border-radius: 2px; color: var(--muted); transition: border-color .15s, color .15s }
+.mk:hover { border-color: var(--ink); color: var(--ink) }
+.mk[aria-pressed="true"] { border-color: var(--ink); color: var(--ink) }
+.mk[aria-pressed="true"]::before { content: "✓ " }
+.go { font: 500 13px/1 var(--sans); padding: 9px 13px; border: 1px solid var(--ink); border-radius: 2px; background: var(--ink); color: var(--paper); white-space: nowrap; margin-left: 6px; transition: background .15s, color .15s }
+.go:hover { background: transparent; color: var(--ink) }
+.job.applied > :not(.acts) { opacity: .4 }
+.job.flash { animation: flash 1.6s ease-out }
+@keyframes flash { from { background: color-mix(in oklab, var(--accent) 14%, transparent) } to { background: transparent } }
+.empty { padding: 56px 0; color: var(--muted); font: 400 20px var(--display) }
 
 /* register */
-.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
-.search { flex: 1 1 220px; min-width: 0; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line);
-  background: var(--surface); color: var(--ink); font: inherit }
-.seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 9px; background: var(--surface); border: 1px solid var(--line) }
-.seg button { padding: 6px 12px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: 500 13px var(--body); cursor: pointer }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg) }
-.reg { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px }
-.reg li { display: grid; grid-template-columns: minmax(0, 1.4fr) 110px 110px minmax(0, 1fr); gap: 4px 16px; align-items: center;
-  padding: 10px 16px; border-bottom: 1px solid var(--line) }
-.reg li:last-child { border-bottom: 0 }
+.reg-tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding-block: 6px }
+.reg-tools:focus-within { border-bottom-color: var(--ink) }
+.reg { columns: 2; column-gap: clamp(20px, 3vw, 48px) }
+.reg li { break-inside: avoid; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 2px 12px; align-items: baseline;
+  padding-block: 11px; border-bottom: 1px solid var(--line) }
+.reg .grade { font-size: 17px }
 .reg .rc { font-weight: 500; overflow-wrap: anywhere }
-.reg .st { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 7px }
-.reg .st.open { color: var(--ink); font-weight: 500 }
-.reg .src, .reg .ats { font: 400 12px var(--mono); color: var(--muted) }
-.reg .ats { text-align: right; overflow-wrap: anywhere }
-.reg .ats a { color: var(--ink) }
-.reg .ats a:hover { color: var(--accent) }
-footer { color: var(--muted); font-size: 13px }
-footer code { font: 12px var(--mono); color: var(--ink) }
+.reg .rs { font-size: 12.5px; color: var(--muted); grid-column: 2 }
+.reg .rs.open { color: var(--ink) }
+.reg .rl { font: 400 12px var(--mono); color: var(--muted); grid-row: 1; grid-column: 3; text-align: right }
+.reg .rl a:hover { color: var(--accent) }
 
-@media (max-width: 820px) {
-  .overview { grid-template-columns: minmax(0, 1fr) }
-  .job { grid-template-columns: minmax(0, 1fr) }
-  .job .acts { justify-content: flex-start }
-  .reg li { grid-template-columns: minmax(0, 1fr) auto }
-  .reg .src { display: none }
-  .reg .ats { grid-column: 1 / -1; text-align: left }
+footer { margin-top: clamp(72px, 9vw, 136px); padding-top: 22px; border-top: 1px solid var(--ink);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 32px; font-size: 13px; color: var(--muted) }
+footer p { max-width: 62ch }
+
+@media (max-width: 1040px) {
+  .sec-head, .sec-body { grid-column: 1 / -1 }
+  .sec-head p { max-width: 60ch }
+  .job { grid-template-columns: 40px minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "g who who" ". role where" ". acts acts"; row-gap: 12px }
 }
-@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important } }
+@media (max-width: 720px) {
+  .figs { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .digest { grid-template-columns: minmax(0, 1fr) }
+  .frow { grid-template-columns: 34px 64px minmax(0, 1fr); gap: 0 10px }
+  .fl { grid-template-columns: minmax(0, 1fr) }
+  .fl.top { grid-template-columns: minmax(0, 1fr) }
+  .fl.top .tabs { padding-bottom: 10px }
+  .job { grid-template-columns: 34px minmax(0, 1fr); grid-template-areas: "g who" ". role" ". where" ". acts" }
+  .acts { flex-wrap: wrap }
+  .reg { columns: 1 }
+  .reg-tools { grid-template-columns: minmax(0, 1fr) }
+  .reg-tools .tabs { padding-bottom: 10px }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } * { animation: none !important; transition: none !important } }
 </style>
+<script>
+// Apply a saved theme choice before first paint.
+try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t) } catch (e) {}
+</script>
 <!--BODY-->
-<div class="wrap">
-  <header>
-    <div class="topline">
-      <span class="label">Internship Radar</span>
-      <span class="label" id="checked"></span>
+<div class="sheet">
+  <header class="mast">
+    <span class="mark">Internship Radar</span>
+    <div class="mast-r">
+      <span class="cap" id="checked"></span>
+      <button id="theme" type="button" aria-label="Darstellung wechseln"></button>
     </div>
-    <h1 id="headline"></h1>
-    <dl class="facts" id="facts"></dl>
   </header>
 
-  <div class="overview">
-    <section aria-labelledby="h-field">
-      <h2 id="h-field">Scan-Feld</h2>
-      <div class="field" id="field" aria-hidden="true"></div>
-      <p class="hint" id="hint">Ein Punkt pro Company, alphabetisch. Farbige Punkte haben offene Stellen.</p>
-    </section>
-    <section aria-labelledby="h-ladder">
-      <h2 id="h-ladder">Nach Standort-Priorität</h2>
-      <ol class="ladder" id="ladder"></ol>
-    </section>
-  </div>
-
-  <section aria-labelledby="h-jobs" style="display:flex;flex-direction:column;gap:20px">
-    <div class="sec-head">
-      <h2 id="h-jobs">Offene Stellen</h2>
-      <button class="btn" id="clear" hidden>Filter zurücksetzen</button>
-    </div>
-    <div class="listings" id="listings"></div>
+  <section class="hero">
+    <h1 id="headline"></h1>
   </section>
+  <dl class="figs" id="figs"></dl>
 
-  <section aria-labelledby="h-reg" style="display:flex;flex-direction:column;gap:16px">
+  <section class="sec" aria-labelledby="h-field">
     <div class="sec-head">
-      <h2 id="h-reg">Alle Companies</h2>
-      <span class="label" id="regcount"></span>
+      <h2 id="h-field">Scan-Feld</h2>
+      <p>Jedes Quadrat ist eine Company, sortiert nach meinem Tier. Gefüllte haben offene Stellen; je kräftiger die Farbe, desto näher an München.</p>
     </div>
-    <div class="tools">
-      <input class="search" id="q" type="search" placeholder="Company suchen …" aria-label="Company suchen">
-      <div class="seg" id="seg" role="group" aria-label="Companies filtern">
-        <button data-f="all" aria-pressed="true">Alle</button>
-        <button data-f="open" aria-pressed="false">Mit Stellen</button>
-        <button data-f="none" aria-pressed="false">Ohne Stellen</button>
-        <button data-f="nolink" aria-pressed="false">Ohne Karriereseite</button>
+    <div class="sec-body">
+      <div class="field" id="field" aria-hidden="true"></div>
+      <div class="field-foot">
+        <ul class="legend" id="legend"></ul>
+        <p class="hint" id="hint"></p>
       </div>
     </div>
-    <ul class="reg" id="reg"></ul>
   </section>
 
-  <footer>Quelle: <code>career_pages_full.csv</code>. Nach einem neuen Scan <code>python3 build.py</code> ausführen, um das Dashboard zu aktualisieren.</footer>
+  <section class="sec" id="sec-digest" aria-labelledby="h-digest">
+    <div class="sec-head">
+      <h2 id="h-digest">Seit dem letzten Scan</h2>
+      <p>Was neu dazugekommen ist, was verschwunden ist und was nicht geprüft werden konnte.</p>
+    </div>
+    <div class="sec-body"><div class="digest" id="digest"></div></div>
+  </section>
+
+  <section class="sec wide" aria-labelledby="h-jobs">
+    <div class="sec-head">
+      <h2 id="h-jobs">Offene Stellen</h2>
+      <p class="summary"><span id="sum"></span><button class="lnk" id="reset" type="button" hidden>Filter zurücksetzen</button></p>
+    </div>
+    <div class="sec-body">
+      <div class="filters">
+        <div class="fl top">
+          <input class="search" id="q" type="search" placeholder="Company, Titel oder Ort suchen" aria-label="Stellen durchsuchen" autocomplete="off">
+          <div class="tabs" id="sort" role="group" aria-label="Sortierung">
+            <span class="cap">Sortiert nach</span>
+            <button class="tab" type="button" data-s="loc" aria-pressed="true">Standort</button>
+            <button class="tab" type="button" data-s="grade" aria-pressed="false">Tier</button>
+            <button class="tab" type="button" data-s="az" aria-pressed="false">A–Z</button>
+          </div>
+        </div>
+        <div id="facets"></div>
+      </div>
+      <div id="list"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-reg">
+    <div class="sec-head">
+      <h2 id="h-reg">Alle Companies</h2>
+      <p>Die komplette Liste mit Link zur jeweiligen Karriereseite, falls ich selbst nachsehen will.</p>
+      <span class="cap num" id="regcount"></span>
+    </div>
+    <div class="sec-body" style="display:flex;flex-direction:column;gap:8px">
+      <div class="reg-tools">
+        <input class="search" id="rq" type="search" placeholder="Company suchen" aria-label="Companies durchsuchen" autocomplete="off">
+        <div class="tabs" id="rseg" role="group" aria-label="Companies filtern">
+          <button class="tab" type="button" data-f="all" aria-pressed="true">Alle</button>
+          <button class="tab" type="button" data-f="open" aria-pressed="false">Mit Stellen</button>
+          <button class="tab" type="button" data-f="none" aria-pressed="false">Ohne Stellen</button>
+          <button class="tab" type="button" data-f="nolink" aria-pressed="false">Ohne Link</button>
+        </div>
+      </div>
+      <ul class="reg" id="reg"></ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>Die Daten stammen aus meinem eigenen Scan öffentlicher Karriereseiten und sind eine Momentaufnahme. „Gemerkt“ und „Beworben“ werden nur in diesem Browser gespeichert.</p>
+    <a class="lnk" href="https://github.com/andiyin/SWE-Internship-Scanner" target="_blank" rel="noopener">Quellcode auf GitHub ↗</a>
+  </footer>
 </div>
 
 <script>
 const DATA = /*__DATA__*/[];
 
-// Location tiers in priority order (Munich first), with German labels.
-const TIERS = [
-  ["Munich", "München"],
-  ["Germany (other city)", "Deutschland (andere Stadt)"],
-  ["EU core (CH/FR/NL/IE/IT/ES)", "EU-Kern (CH/FR/NL/IE/IT/ES)"],
-  ["Singapore", "Singapur"],
-  ["Rest of Europe", "Restliches Europa"],
-];
-const tierIdx = t => { const i = TIERS.findIndex(x => x[0] === t); return i < 0 ? TIERS.length : i };
-const tierName = i => i < TIERS.length ? TIERS[i][1] : "Sonstige";
-const tierColor = i => `var(--t${i < TIERS.length ? i + 1 : 0})`;
+// Location tiers in priority order (Munich first) and my company tiers, best first.
+const LOCS = [["Munich", "München"], ["Germany (other city)", "Deutschland"], ["EU core (CH/FR/NL/IE/IT/ES)", "EU-Kern"],
+  ["Singapore", "Singapur"], ["Rest of Europe", "Restl. Europa"]];
+const GRADES = ["S+", "S", "A+", "A", "B"];
+const locIdx = t => { const i = LOCS.findIndex(x => x[0] === t); return i < 0 ? LOCS.length : i };
+const locName = i => i < LOCS.length ? LOCS[i][1] : "Sonstige";
+const gradeIdx = g => { const i = GRADES.indexOf(g); return i < 0 ? GRADES.length : i };
+const gradeName = i => i < GRADES.length ? GRADES[i] : "–";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e };
+const btn = (cls, text) => { const b = el("button", cls, text); b.type = "button"; return b };
 const safeUrl = u => /^https?:\/\//i.test(u || "") ? u : "";
 const link = (href, text, cls) => { const a = el("a", cls, text); a.href = href; a.target = "_blank"; a.rel = "noopener"; return a };
 const host = u => { try { return new URL(u).hostname.replace(/^www\./, "") } catch { return "" } };
 const ATS = [["greenhouse", "Greenhouse"], ["ashbyhq", "Ashby"], ["personio", "Personio"], ["lever.co", "Lever"], ["recruitee", "Recruitee"],
-  ["rippling", "Rippling"], ["workable", "Workable"], ["smartrecruiters", "SmartRecruiters"], ["workday", "Workday"], ["join.com", "JOIN"], ["teamtailor", "Teamtailor"]];
+  ["rippling", "Rippling"], ["workable", "Workable"], ["smartrecruiters", "SmartRecruiters"], ["myworkdayjobs", "Workday"], ["join.com", "JOIN"], ["teamtailor", "Teamtailor"]];
 const atsName = u => { const h = host(u); const m = ATS.find(a => h.includes(a[0])); return m ? m[1] : h };
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const sw = i => { const s = el("span", "sw"); s.style.setProperty("--c", `var(--l${Math.min(i, LOCS.length)})`); return s };
 
-const rows = DATA.map((r, i) => ({ ...r, i, open: r.n > 0 || !!r.title, ti: tierIdx(r.tier) }));
-const open = rows.filter(r => r.open).sort((a, b) => a.ti - b.ti || a.company.localeCompare(b.company));
-const matches = rows.reduce((s, r) => s + r.n, 0);
-let tierFilter = null, regFilter = "all";
-
-// header
-const fmtDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : d };
-const last = rows.map(r => r.checked).sort().pop();
-$("checked").textContent = last ? "Stand " + fmtDate(last) : "";
-const h1 = $("headline");
-h1.append(el("em", "", String(open.length)), ` von ${rows.length} Companies haben gerade offene Internships.`);
-const fact = (n, label) => { const d = el("div"); d.append(el("dt", "", label), el("dd", "", String(n))); return d };
-$("facts").append(
-  fact(matches, "passende Stellen insgesamt"),
-  fact(open.filter(r => r.ti === 0).length, "in München"),
-  fact(open.filter(r => r.status === "NEW").length, "neu seit letztem Scan"),
-  fact(rows.filter(r => !r.open).length, "ohne Treffer"));
-
-// scan field
-const hint = $("hint"), hintDefault = hint.textContent;
-const dots = rows.map(r => {
-  const b = el("button", "dot" + (r.open ? " on" : ""));
-  b.tabIndex = -1; b.type = "button";
-  if (r.open) b.style.setProperty("--c", tierColor(r.ti));
-  b.onmouseenter = () => { hint.replaceChildren(el("b", "", r.company), r.open ? ` · ${r.n} ${r.n === 1 ? "Stelle" : "Stellen"} · ${tierName(r.ti)}` : " · keine Treffer") };
-  b.onmouseleave = () => { hint.textContent = hintDefault };
-  b.onclick = () => r.open ? jumpTo(r) : findInRegister(r.company);
-  $("field").append(b);
-  return b;
+const rows = DATA.map((r, i) => {
+  const s = (r.status || "").toLowerCase(), open = r.n > 0 || !!r.title;
+  return { ...r, i, open, li: locIdx(r.tier), gi: gradeIdx(r.grade),
+    st: s === "new" ? "new" : s.includes("no longer") ? "gone" : s.includes("unverified") || s.includes("error") ? "error" : open ? "open" : "",
+    kind: /working student|werkstudent/i.test(r.title) ? "Werkstudent" : "Praktikum",
+    key: r.url || r.company + "|" + r.title,
+    hay: `${r.company} ${r.title} ${r.loc}`.toLowerCase() };
 });
+const byName = (a, b) => a.company.localeCompare(b.company, "de");
+const open = rows.filter(r => r.open);
+const usedGrades = [...new Set(rows.map(r => r.gi))].sort((a, b) => a - b);
+const usedLocs = [...new Set(open.map(r => r.li))].sort((a, b) => a - b);
+
+// saved / applied marks live in this browser only
+let track = {};
+try { track = JSON.parse(localStorage.getItem("radar.track") || "{}") || {} } catch (e) {}
+const saveTrack = () => { try { localStorage.setItem("radar.track", JSON.stringify(track)) } catch (e) {} };
+
+/* ---------- masthead, headline, figures ---------- */
+const fmtDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : d };
+const last = rows.map(r => r.checked).filter(Boolean).sort().pop();
+$("checked").textContent = last ? "Stand " + fmtDate(last) : "";
+$("headline").append(el("em", "", String(open.length)), ` von ${rows.length} Companies haben gerade offene Internships.`);
+const fig = (n, label) => { const d = el("div"); d.append(el("dt", "cap", label), el("dd", "", String(n))); return d };
+$("figs").append(
+  fig(rows.reduce((s, r) => s + r.n, 0), "Passende Stellen"),
+  fig(open.filter(r => r.st === "new").length, "Neu seit letztem Scan"),
+  fig(open.filter(r => r.li === 0).length, "In München"),
+  fig(open.filter(r => r.gi <= 1).length, "Bei S+ und S Companies"));
+
+const THEMES = [["auto", "Auto"], ["light", "Hell"], ["dark", "Dunkel"]];
+let theme = document.documentElement.getAttribute("data-theme") || "auto";
+const showTheme = () => { $("theme").textContent = "Darstellung · " + (THEMES.find(t => t[0] === theme) || THEMES[0])[1] };
+$("theme").onclick = () => {
+  theme = THEMES[(THEMES.findIndex(t => t[0] === theme) + 1) % THEMES.length][0];
+  if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
+  try { localStorage.setItem("radar.theme", theme) } catch (e) {}
+  showTheme();
+};
+showTheme();
+
+/* ---------- filter state ---------- */
+const F = { loc: new Set(), grade: new Set(), kind: new Set(), view: new Set(), q: "", sort: "loc" };
+const test = (id, v, r) => id === "loc" ? r.li === v : id === "grade" ? r.gi === v : id === "kind" ? r.kind === v
+  : v === "new" ? r.st === "new" : v === "saved" ? track[r.key] === "saved" : track[r.key] !== "applied";
+// loc / grade / kind: any selected value matches. view: every selected toggle must hold.
+function pass(r, skip) {
+  for (const id of ["loc", "grade", "kind"]) if (id !== skip && F[id].size && ![...F[id]].some(v => test(id, v, r))) return false;
+  for (const v of F.view) if (!test("view", v, r)) return false;
+  return !F.q || r.hay.includes(F.q);
+}
+const FACETS = [
+  { id: "loc", label: "Standort", opts: usedLocs.map(i => [i, locName(i)]) },
+  { id: "grade", label: "Tier", opts: usedGrades.filter(i => i < GRADES.length || open.some(r => r.gi === i)).map(i => [i, gradeName(i)]) },
+  { id: "kind", label: "Art", opts: [["Praktikum", "Praktikum"], ["Werkstudent", "Werkstudent"]] },
+  { id: "view", label: "Ansicht", opts: [["new", "Nur neue"], ["saved", "Gemerkt"], ["todo", "Noch nicht beworben"]] },
+].filter(f => f.opts.length > 1);
+const chips = [];
+for (const f of FACETS) {
+  const line = el("div", "fl"), box = el("div", "chips");
+  box.setAttribute("role", "group"); box.setAttribute("aria-label", f.label);
+  for (const [v, label] of f.opts) {
+    const b = btn("chip"), n = el("span", "n num");
+    if (f.id === "loc") b.append(sw(v));
+    b.append(label, n);
+    b.onclick = () => { F[f.id].has(v) ? F[f.id].delete(v) : F[f.id].add(v); render() };
+    chips.push({ f, v, b, n }); box.append(b);
+  }
+  line.append(el("span", "cap", f.label), box); $("facets").append(line);
+}
+const active = () => F.loc.size + F.grade.size + F.kind.size + F.view.size + (F.q ? 1 : 0) > 0;
+function resetFilters() { F.loc.clear(); F.grade.clear(); F.kind.clear(); F.view.clear(); F.q = ""; $("q").value = "" }
+$("reset").onclick = () => { resetFilters(); render() };
+$("q").oninput = e => { F.q = e.target.value.trim().toLowerCase(); render() };
+$("sort").onclick = e => { const b = e.target.closest("button"); if (!b) return; F.sort = b.dataset.s;
+  $("sort").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); render() };
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) { e.preventDefault(); $("q").focus() }
+});
+
+/* ---------- scan field ---------- */
+const hint = $("hint");
+const dots = [];
+for (const g of usedGrades) {
+  const members = rows.filter(r => r.gi === g).sort((a, b) => (b.open - a.open) || (a.li - b.li) || byName(a, b));
+  const line = el("div", "frow"), of = el("span", "of num"), box = el("div", "dots");
+  of.append(el("b", "", String(members.filter(r => r.open).length)), ` / ${members.length}`);
+  for (const r of members) {
+    const d = btn("dot" + (r.open ? " on" : "")); d.tabIndex = -1;
+    if (r.open) d.style.setProperty("--c", `var(--l${r.li})`);
+    d.onmouseenter = () => hint.replaceChildren(el("b", "", r.company),
+      r.open ? ` · ${plural(r.n, "Stelle", "Stellen")} · ${locName(r.li)}` : r.st === "gone" ? " · nicht mehr gelistet" : " · keine Treffer");
+    d.onmouseleave = () => hint.replaceChildren();
+    d.onclick = () => r.open ? jumpTo(r) : findInRegister(r.company);
+    dots.push([r, d]); box.append(d);
+  }
+  line.append(el("span", "grade", gradeName(g)), of, box); $("field").append(line);
+}
+for (const i of usedLocs) { const li = el("li"); li.append(sw(i), locName(i)); $("legend").append(li) }
 
 function jumpTo(r) {
-  if (tierFilter !== null && tierFilter !== r.ti) setTier(null);
-  const n = document.getElementById("job-" + r.i);
-  if (!n) return;
-  n.scrollIntoView({ behavior: "smooth", block: "center" });
+  if (!pass(r)) { resetFilters(); render() }
+  const n = $("job-" + r.i); if (!n) return;
+  n.scrollIntoView({ block: "center" });
   n.classList.remove("flash"); void n.offsetWidth; n.classList.add("flash");
 }
-function findInRegister(name) {
-  $("q").value = name; setReg("all");
-  $("h-reg").scrollIntoView({ behavior: "smooth", block: "start" });
-}
+function findInRegister(name) { $("rq").value = name; setReg("all"); $("h-reg").scrollIntoView({ block: "start" }) }
 
-// ladder
-const usedTiers = [...new Set([...TIERS.keys(), ...open.map(r => r.ti)])].sort((a, b) => a - b);
-const counts = Object.fromEntries(usedTiers.map(t => [t, open.filter(r => r.ti === t).length]));
-const maxCount = Math.max(1, ...Object.values(counts));
-const rungs = usedTiers.map(t => {
-  const li = el("li"), b = el("button", "rung" + (counts[t] ? "" : " zero"));
-  b.type = "button"; b.setAttribute("aria-pressed", "false"); b.style.setProperty("--c", tierColor(t));
-  const track = el("span", "track"), bar = el("span", "bar");
-  bar.style.width = (counts[t] / maxCount * 100) + "%"; track.append(bar);
-  b.append(el("span", "name", tierName(t)), el("span", "n", String(counts[t])), track);
-  b.onclick = () => setTier(tierFilter === t ? null : t);
-  li.append(b); $("ladder").append(li);
-  return [t, b];
-});
+/* ---------- change digest ---------- */
+(function digest() {
+  const fresh = open.filter(r => r.st === "new").sort((a, b) => (a.gi - b.gi) || byName(a, b));
+  const gone = rows.filter(r => r.st === "gone").sort(byName), err = rows.filter(r => r.st === "error").sort(byName);
+  if (!fresh.length && !gone.length && !err.length) { $("sec-digest").hidden = true; return }
+  const col = (label, list, item, none) => {
+    const c = el("div"); c.append(el("span", "cap num", `${label} · ${list.length}`));
+    if (!list.length) { c.append(el("p", "none", none)); return c }
+    const ul = el("ul"); for (const r of list) { const li = el("li"); li.append(item(r)); ul.append(li) } c.append(ul); return c;
+  };
+  $("digest").append(
+    col("Neu", fresh, r => { const b = btn("", r.company); b.onclick = () => jumpTo(r); return b }, "Nichts Neues."),
+    col("Nicht mehr gelistet", gone, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), "Nichts weggefallen."),
+    col("Nicht geprüft", err, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), "Alle Scans liefen durch."));
+  if (err.length) $("digest").lastChild.append(el("small", "", "Scan fehlgeschlagen, gezeigt wird der letzte bekannte Stand."));
+})();
 
-function setTier(t) {
-  tierFilter = t;
-  rungs.forEach(([k, b]) => b.setAttribute("aria-pressed", String(k === t)));
-  dots.forEach((d, i) => d.classList.toggle("dim", t !== null && !(rows[i].open && rows[i].ti === t)));
-  $("clear").hidden = t === null;
-  renderJobs();
-}
-$("clear").onclick = () => setTier(null);
-
-// listings
-function renderJobs() {
-  const box = $("listings"); box.replaceChildren();
-  const shown = open.filter(r => tierFilter === null || r.ti === tierFilter);
-  if (!shown.length) { box.append(el("p", "empty", tierFilter === null ? "Aktuell keine offenen Stellen im Scan." : "Keine offenen Stellen in dieser Standort-Stufe.")); return }
-  for (const t of usedTiers) {
-    const g = shown.filter(r => r.ti === t); if (!g.length) continue;
-    const sec = el("div", "group"), h = el("h3");
-    const sw = el("span", "swatch"); sw.style.setProperty("--c", tierColor(t));
-    h.append(sw, `${tierName(t)} · ${g.length}`); sec.append(h);
-    for (const r of g) {
-      const job = el("article", "job"); job.id = "job-" + r.i;
-      const co = el("div", "co", r.company); if (r.status === "NEW") co.append(el("span", "badge", "NEU"));
-      const role = el("div", "role");
-      role.append(el("div", "title", r.title || "Stelle ohne Titel"));
-      const extra = r.n > 1 ? ` · +${r.n - 1} weitere ${r.n - 1 === 1 ? "Stelle" : "Stellen"} auf der Karriereseite` : "";
-      role.append(el("div", "meta", (r.loc || "Ort unbekannt") + extra));
-      const acts = el("div", "acts"), u = safeUrl(r.url), b = safeUrl(r.board);
-      if (b) acts.append(link(b, r.n > 1 ? `Alle ${r.n} ansehen` : "Karriereseite", "btn"));
-      if (u) acts.append(link(u, "Stelle öffnen ↗", "btn go"));
-      job.append(co, role, acts); sec.append(job);
-    }
-    box.append(sec);
+/* ---------- listings ---------- */
+const ORDER = {
+  loc: (a, b) => (a.li - b.li) || (a.gi - b.gi) || byName(a, b),
+  grade: (a, b) => (a.gi - b.gi) || (a.li - b.li) || byName(a, b),
+  az: byName,
+};
+function jobRow(r) {
+  const job = el("article", "job" + (track[r.key] === "applied" ? " applied" : "")); job.id = "job-" + r.i;
+  const who = el("div", "who"); who.append(el("h3", "co", r.company));
+  who.append(el("span", "st" + (r.st === "new" ? " new" : ""), r.st === "new" ? "Neu" : r.st === "open" ? "Weiterhin offen" : ""));
+  const role = el("div", "role"), m = el("div", "m"), b = safeUrl(r.board), u = safeUrl(r.url);
+  role.append(el("div", "t", r.title || "Stelle ohne Titel"));
+  m.append(r.kind);
+  if (r.n > 1) { m.append(" · "); const more = `${plural(r.n - 1, "weitere Stelle", "weitere Stellen")}`; m.append(b ? link(b, more + " ↗", "lnk") : more) }
+  role.append(m);
+  const where = el("div", "where"), wm = el("div", "m");
+  wm.append(sw(r.li), locName(r.li)); where.append(el("div", "", r.loc || "Ort unbekannt"), wm);
+  const acts = el("div", "acts");
+  for (const [state, label] of [["saved", "Merken"], ["applied", "Beworben"]]) {
+    const k = btn("mk", label); k.setAttribute("aria-pressed", String(track[r.key] === state));
+    k.onclick = () => { if (track[r.key] === state) delete track[r.key]; else track[r.key] = state; saveTrack(); render() };
+    acts.append(k);
   }
+  if (u || b) acts.append(link(u || b, u ? "Öffnen ↗" : "Karriereseite ↗", "go"));
+  job.append(el("span", "grade", gradeName(r.gi)), who, role, where, acts);
+  return job;
+}
+function render() {
+  const shown = open.filter(r => pass(r)).sort(ORDER[F.sort]);
+  const list = $("list"); list.replaceChildren();
+  if (!shown.length) list.append(el("p", "empty", open.length ? "Keine Stelle passt zu diesen Filtern." : "Im letzten Scan war keine offene Stelle dabei."));
+  let group = null;
+  for (const r of shown) {
+    const g = F.sort === "loc" ? r.li : F.sort === "grade" ? r.gi : null;
+    if (g !== null && g !== group) {
+      group = g;
+      const h = el("div", "grp"), name = el("span", "cap gname");
+      if (F.sort === "loc") name.append(sw(g), locName(g)); else name.append("Tier " + gradeName(g));
+      h.append(name, el("span", "cap num", String(shown.filter(x => (F.sort === "loc" ? x.li : x.gi) === g).length)));
+      list.append(h);
+    }
+    list.append(jobRow(r));
+  }
+  for (const c of chips) {
+    const on = F[c.f.id].has(c.v);
+    const n = open.filter(r => test(c.f.id, c.v, r) && pass(r, c.f.id)).length;
+    c.n.textContent = n; c.b.setAttribute("aria-pressed", String(on)); c.b.classList.toggle("zero", !n && !on);
+  }
+  const some = active();
+  for (const [r, d] of dots) d.classList.toggle("dim", some && !(r.open && pass(r)));
+  const sum = $("sum"); sum.replaceChildren(el("b", "num", plural(shown.length, "Company", "Companies")),
+    ` · ${plural(shown.reduce((s, r) => s + Math.max(r.n, 1), 0), "Stelle", "Stellen")}`);
+  $("reset").hidden = !some;
 }
 
-// register
+/* ---------- register ---------- */
+let regFilter = "all";
+const regRows = [...rows].sort((a, b) => (a.gi - b.gi) || byName(a, b));
 function renderReg() {
-  const q = $("q").value.trim().toLowerCase(), ul = $("reg"); ul.replaceChildren();
-  const shown = rows.filter(r => r.company.toLowerCase().includes(q) &&
+  const q = $("rq").value.trim().toLowerCase(), ul = $("reg"); ul.replaceChildren();
+  const shown = regRows.filter(r => r.company.toLowerCase().includes(q) &&
     (regFilter === "all" || (regFilter === "open" && r.open) || (regFilter === "none" && !r.open) || (regFilter === "nolink" && !safeUrl(r.board))));
   $("regcount").textContent = `${shown.length} von ${rows.length}`;
-  if (!shown.length) { const li = el("li"); li.append(el("span", "st", "Keine Company passt zu diesem Filter.")); ul.append(li); return }
+  if (!shown.length) { const li = el("li"); li.append(el("span"), el("span", "rs", "Keine Company passt zu dieser Auswahl.")); ul.append(li); return }
   for (const r of shown) {
-    const li = el("li"), st = el("span", "st" + (r.open ? " open" : ""));
-    if (r.open) { const sw = el("span", "swatch"); sw.style.setProperty("--c", tierColor(r.ti)); st.append(sw, `${r.n} offen`) } else st.textContent = "keine Treffer";
-    const ats = el("span", "ats"), b = safeUrl(r.board);
-    if (b) ats.append(link(b, atsName(b) + " ↗")); else ats.textContent = "kein Link";
-    li.append(el("span", "rc", r.company), st, el("span", "src", r.web ? "Websuche" : "ATS-API"), ats);
+    const li = el("li"), b = safeUrl(r.board), rl = el("span", "rl");
+    if (b) rl.append(link(b, atsName(b) + " ↗")); else rl.textContent = "kein Link";
+    li.append(el("span", "grade", gradeName(r.gi)), el("span", "rc", r.company), rl,
+      el("span", "rs" + (r.open ? " open" : ""), r.open ? `${plural(r.n, "offene Stelle", "offene Stellen")} · ${locName(r.li)}`
+        : r.st === "gone" ? "nicht mehr gelistet" : r.st === "error" ? "Scan fehlgeschlagen" : "keine Treffer"));
     ul.append(li);
   }
 }
 function setReg(f) {
   regFilter = f;
-  $("seg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
+  $("rseg").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === f)));
   renderReg();
 }
-$("seg").onclick = e => { const b = e.target.closest("button"); if (b) setReg(b.dataset.f) };
-$("q").oninput = renderReg;
+$("rseg").onclick = e => { const b = e.target.closest("button"); if (b) setReg(b.dataset.f) };
+$("rq").oninput = renderReg;
 
-renderJobs(); renderReg();
+render(); renderReg();
 </script>

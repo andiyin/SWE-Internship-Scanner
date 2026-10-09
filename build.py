@@ -1,15 +1,35 @@
 #!/usr/bin/env python3
-"""Builds dashboard.html from career_pages_full.csv and template.html.
+"""Builds dashboard.html from the internship CSV and template.html.
 
-Usage: python3 build.py [path/to/file.csv]
+Where the CSV comes from, in this order:
+  1. a path given on the command line
+  2. the CSV_PATH environment variable
+  3. the path written in a file called .csv-source (not committed)
+  4. career_pages_full.csv in this folder
+
+If the CSV lives somewhere else, it is also copied into this folder so the
+copy in the repo (which the hosted site is built from) stays up to date.
 """
 import csv
+import io
 import json
+import os
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
 DEFAULT_CSV = HERE / "career_pages_full.csv"
+
+
+def source_csv():
+    path = os.environ.get("CSV_PATH", "").strip()
+    pointer = HERE / ".csv-source"
+    if not path and pointer.exists():
+        path = pointer.read_text(encoding="utf-8").strip()
+    if not path:
+        return DEFAULT_CSV
+    path = Path(path).expanduser()
+    return path if path.is_absolute() else HERE / path
 
 
 def to_int(value):
@@ -19,11 +39,21 @@ def to_int(value):
         return 0
 
 
-def build(csv_path=DEFAULT_CSV):
-    with open(csv_path, encoding="utf-8-sig", newline="") as f:
-        rows = [
+def build(csv_path=None):
+    csv_path = Path(csv_path) if csv_path else source_csv()
+    raw = csv_path.read_bytes()
+    if csv_path.resolve() != DEFAULT_CSV.resolve() and (not DEFAULT_CSV.exists() or DEFAULT_CSV.read_bytes() != raw):
+        DEFAULT_CSV.write_bytes(raw)
+
+    rows = []
+    for r in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline="")):
+        company = (r.get("Company") or "").strip()
+        if not company:
+            continue
+        rows.append(
             {
-                "company": (r.get("Company") or "").strip(),
+                "company": company,
+                "grade": (r.get("Tier") or "").strip(),
                 "status": (r.get("Status") or "").strip(),
                 "title": (r.get("Position Title") or "").strip(),
                 "loc": (r.get("Location") or "").strip(),
@@ -32,17 +62,14 @@ def build(csv_path=DEFAULT_CSV):
                 "board": (r.get("Career/Board URL") or "").strip(),
                 "n": to_int(r.get("All Current Matches (count)")),
                 "checked": (r.get("Last Checked") or "").strip(),
-                "web": "web search" in (r.get("Notes") or ""),
             }
-            for r in csv.DictReader(f)
-            if (r.get("Company") or "").strip()
-        ]
+        )
 
     data = json.dumps(rows, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     template = (HERE / "template.html").read_text(encoding="utf-8")
     head, body = template.replace("/*__DATA__*/[]", data).split("<!--BODY-->")
 
-    # Standalone file for opening locally.
+    # Standalone file for opening locally and for hosting.
     (HERE / "dashboard.html").write_text(
         '<!doctype html>\n<html lang="de">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -55,5 +82,5 @@ def build(csv_path=DEFAULT_CSV):
 
 
 if __name__ == "__main__":
-    total, with_jobs = build(Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_CSV)
-    print(f"{total} Companies, {with_jobs} mit offenen Stellen -> dashboard.html")
+    total, with_jobs = build(sys.argv[1] if len(sys.argv) > 1 else None)
+    print(f"{total} companies, {with_jobs} with open internships -> dashboard.html")
