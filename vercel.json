@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "python3 build.py && mkdir -p public && cp dashboard.html public/index.html",
+  "outputDirectory": "public"
+}

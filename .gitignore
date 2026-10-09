@@ -5,3 +5,4 @@ dashboard.artifact.html
 __pycache__/
 .DS_Store
 .claude/
+public/
