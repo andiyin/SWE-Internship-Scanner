@@ -4,7 +4,7 @@
 
 I keep a list of interesting companies and check their career pages for software / AI internships. Scrolling through a CSV with 150+ rows got annoying, so I built a small dashboard for it.
 
-It shows which companies currently have open internships and links straight to the postings. Every company has a tier (S+ to B) and every posting a location priority (Munich first, then the rest of Germany, then other places in Europe). The UI is in German.
+It shows which companies currently have open internships and links straight to the postings. Every company has a tier (S+ to B) and every posting a location priority (Munich first, then the rest of Germany, then other places in Europe). The UI is in German, with an English version you can switch to in the top right (or open the link with `#en` at the end).
 
 ## What it can do
 

@@ -54,8 +54,8 @@ ul, ol { list-style: none }
 .mast .mark::before { content: ""; width: 9px; height: 9px; background: var(--ink) }
 .mast .by { font: italic 400 15px/1 var(--display); letter-spacing: 0; text-transform: none; color: var(--muted); padding-left: 10px; border-left: 1px solid var(--line) }
 .mast-r { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px }
-#theme { font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
-#theme:hover { color: var(--ink) }
+#theme, #lang { font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted) }
+#theme:hover, #lang:hover, #lang .on { color: var(--ink) }
 
 /* hero */
 .hero { padding-block: clamp(56px, 10vw, 136px) clamp(48px, 7vw, 88px) }
@@ -193,16 +193,22 @@ footer p { max-width: 62ch }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } * { animation: none !important; transition: none !important } }
 </style>
 <script>
-// Apply a saved theme choice before first paint.
+// Apply the saved theme and language before first paint. "#en" / "#de" in the link wins over the saved language.
+(function () {
+  let lang = location.hash === "#en" ? "en" : location.hash === "#de" ? "de" : "";
+  try { lang = lang || localStorage.getItem("radar.lang") } catch (e) {}
+  document.documentElement.lang = lang === "en" ? "en" : "de";
+})();
 try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t) } catch (e) {}
 </script>
 <!--BODY-->
 <div class="sheet">
   <header class="mast">
-    <span class="mark">Internship Radar<span class="by">von Andi</span></span>
+    <span class="mark">Internship Radar<span class="by" data-en="by Andi Yin">von Andi Yin</span></span>
     <div class="mast-r">
       <span class="cap" id="checked"></span>
-      <button id="theme" type="button" aria-label="Darstellung wechseln"></button>
+      <button id="lang" type="button" aria-label="Sprache wechseln" data-en-label="Switch language"><span data-l="de">DE</span> / <span data-l="en">EN</span></button>
+      <button id="theme" type="button" aria-label="Darstellung wechseln" data-en-label="Switch theme"></button>
     </div>
   </header>
 
@@ -213,8 +219,8 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 
   <section class="sec" aria-labelledby="h-field">
     <div class="sec-head">
-      <h2 id="h-field">Scan-Feld</h2>
-      <p>Jedes Quadrat ist eine Company, sortiert nach meinem Tier. Gefüllte haben offene Stellen; je kräftiger die Farbe, desto näher an München.</p>
+      <h2 id="h-field" data-en="Scan field">Scan-Feld</h2>
+      <p data-en="Each square is one company, grouped by my tier. Filled squares have open roles; the stronger the shade, the closer the role is to Munich.">Jedes Quadrat ist eine Company, sortiert nach meinem Tier. Gefüllte haben offene Stellen; je kräftiger die Farbe, desto näher an München.</p>
     </div>
     <div class="sec-body">
       <div class="field" id="field" aria-hidden="true"></div>
@@ -227,24 +233,24 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 
   <section class="sec" id="sec-digest" aria-labelledby="h-digest">
     <div class="sec-head">
-      <h2 id="h-digest">Seit dem letzten Scan</h2>
-      <p>Was neu dazugekommen ist, was verschwunden ist und was nicht geprüft werden konnte.</p>
+      <h2 id="h-digest" data-en="Since the last scan">Seit dem letzten Scan</h2>
+      <p data-en="What was added, what disappeared and what couldn’t be checked.">Was neu dazugekommen ist, was verschwunden ist und was nicht geprüft werden konnte.</p>
     </div>
     <div class="sec-body"><div class="digest" id="digest"></div></div>
   </section>
 
   <section class="sec wide" aria-labelledby="h-jobs">
     <div class="sec-head">
-      <h2 id="h-jobs">Offene Stellen</h2>
-      <p class="summary"><span id="sum"></span><button class="lnk" id="reset" type="button" hidden>Filter zurücksetzen</button></p>
+      <h2 id="h-jobs" data-en="Open roles">Offene Stellen</h2>
+      <p class="summary"><span id="sum"></span><button class="lnk" id="reset" type="button" data-en="Reset filters" hidden>Filter zurücksetzen</button></p>
     </div>
     <div class="sec-body">
       <div class="filters">
         <div class="fl top">
-          <input class="search" id="q" type="search" placeholder="Company, Titel oder Ort suchen" aria-label="Stellen durchsuchen" autocomplete="off">
-          <div class="tabs" id="sort" role="group" aria-label="Sortierung">
-            <span class="cap">Sortiert nach</span>
-            <button class="tab" type="button" data-s="loc" aria-pressed="true">Standort</button>
+          <input class="search" id="q" type="search" placeholder="Company, Titel oder Ort suchen" data-en-placeholder="Search company, title or location" aria-label="Stellen durchsuchen" data-en-label="Search roles" autocomplete="off">
+          <div class="tabs" id="sort" role="group" aria-label="Sortierung" data-en-label="Sort order">
+            <span class="cap" data-en="Sorted by">Sortiert nach</span>
+            <button class="tab" type="button" data-s="loc" aria-pressed="true" data-en="Location">Standort</button>
             <button class="tab" type="button" data-s="grade" aria-pressed="false">Tier</button>
             <button class="tab" type="button" data-s="az" aria-pressed="false">A–Z</button>
           </div>
@@ -257,18 +263,18 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 
   <section class="sec" aria-labelledby="h-reg">
     <div class="sec-head">
-      <h2 id="h-reg">Alle Companies</h2>
-      <p>Die komplette Liste mit Link zur jeweiligen Karriereseite, falls ich selbst nachsehen will.</p>
+      <h2 id="h-reg" data-en="All companies">Alle Companies</h2>
+      <p data-en="The full list with a link to each careers page, in case I want to check for myself.">Die komplette Liste mit Link zur jeweiligen Karriereseite, falls ich selbst nachsehen will.</p>
       <span class="cap num" id="regcount"></span>
     </div>
     <div class="sec-body" style="display:flex;flex-direction:column;gap:8px">
       <div class="reg-tools">
-        <input class="search" id="rq" type="search" placeholder="Company suchen" aria-label="Companies durchsuchen" autocomplete="off">
-        <div class="tabs" id="rseg" role="group" aria-label="Companies filtern">
-          <button class="tab" type="button" data-f="all" aria-pressed="true">Alle</button>
-          <button class="tab" type="button" data-f="open" aria-pressed="false">Mit Stellen</button>
-          <button class="tab" type="button" data-f="none" aria-pressed="false">Ohne Stellen</button>
-          <button class="tab" type="button" data-f="nolink" aria-pressed="false">Ohne Link</button>
+        <input class="search" id="rq" type="search" placeholder="Company suchen" data-en-placeholder="Search company" aria-label="Companies durchsuchen" data-en-label="Search companies" autocomplete="off">
+        <div class="tabs" id="rseg" role="group" aria-label="Companies filtern" data-en-label="Filter companies">
+          <button class="tab" type="button" data-f="all" aria-pressed="true" data-en="All">Alle</button>
+          <button class="tab" type="button" data-f="open" aria-pressed="false" data-en="With roles">Mit Stellen</button>
+          <button class="tab" type="button" data-f="none" aria-pressed="false" data-en="No roles">Ohne Stellen</button>
+          <button class="tab" type="button" data-f="nolink" aria-pressed="false" data-en="No link">Ohne Link</button>
         </div>
       </div>
       <ul class="reg" id="reg"></ul>
@@ -276,20 +282,31 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
   </section>
 
   <footer>
-    <p>Die Daten stammen aus meinem eigenen Scan öffentlicher Karriereseiten und sind eine Momentaufnahme. „Gemerkt“ und „Beworben“ werden nur in diesem Browser gespeichert.</p>
-    <span>Gebaut von Andi · <a class="lnk" href="https://github.com/andiyin/SWE-Internship-Scanner" target="_blank" rel="noopener">Quellcode auf GitHub ↗</a></span>
+    <p data-en="The data comes from my own scan of public careers pages and is a snapshot. “Saved” and “Applied” are stored in this browser only.">Die Daten stammen aus meinem eigenen Scan öffentlicher Karriereseiten und sind eine Momentaufnahme. „Gemerkt“ und „Beworben“ werden nur in diesem Browser gespeichert.</p>
+    <span><span data-en="Built by Andi Yin">Gebaut von Andi Yin</span> · <a class="lnk" href="https://github.com/andiyin/SWE-Internship-Scanner" target="_blank" rel="noopener" data-en="Source on GitHub ↗">Quellcode auf GitHub ↗</a></span>
   </footer>
 </div>
 
 <script>
 const DATA = /*__DATA__*/[];
 
+// Language: German is the text in the markup, English is swapped in from data-en attributes and L().
+const EN = document.documentElement.lang === "en";
+const L = (de, en) => EN ? en : de;
+if (EN) {
+  document.querySelectorAll("[data-en]").forEach(e => { e.textContent = e.dataset.en });
+  document.querySelectorAll("[data-en-placeholder]").forEach(e => { e.placeholder = e.dataset.enPlaceholder });
+  document.querySelectorAll("[data-en-label]").forEach(e => e.setAttribute("aria-label", e.dataset.enLabel));
+}
+
 // Location tiers in priority order (Munich first) and my company tiers, best first.
 const LOCS = [["Munich", "München"], ["Germany (other city)", "Deutschland"], ["EU core (CH/FR/NL/IE/IT/ES)", "EU-Kern"],
   ["Singapore", "Singapur"], ["Rest of Europe", "Restl. Europa"]];
 const GRADES = ["S+", "S", "A+", "A", "B"];
 const locIdx = t => { const i = LOCS.findIndex(x => x[0] === t); return i < 0 ? LOCS.length : i };
-const locName = i => i < LOCS.length ? LOCS[i][1] : "Sonstige";
+const LOCS_EN = ["Munich", "Germany", "EU core", "Singapore", "Rest of Europe"];
+const locName = i => i < LOCS.length ? L(LOCS[i][1], LOCS_EN[i]) : L("Sonstige", "Other");
+const kindName = k => k === "Werkstudent" ? L("Werkstudent", "Working student") : L("Praktikum", "Internship");
 const gradeIdx = g => { const i = GRADES.indexOf(g); return i < 0 ? GRADES.length : i };
 const gradeName = i => i < GRADES.length ? GRADES[i] : "–";
 
@@ -303,6 +320,7 @@ const ATS = [["greenhouse", "Greenhouse"], ["ashbyhq", "Ashby"], ["personio", "P
   ["rippling", "Rippling"], ["workable", "Workable"], ["smartrecruiters", "SmartRecruiters"], ["myworkdayjobs", "Workday"], ["join.com", "JOIN"], ["teamtailor", "Teamtailor"]];
 const atsName = u => { const h = host(u); const m = ATS.find(a => h.includes(a[0])); return m ? m[1] : h };
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const roles = n => plural(n, L("Stelle", "role"), L("Stellen", "roles"));
 const sw = i => { const s = el("span", "sw"); s.style.setProperty("--c", `var(--l${Math.min(i, LOCS.length)})`); return s };
 
 const rows = DATA.map((r, i) => {
@@ -324,20 +342,21 @@ try { track = JSON.parse(localStorage.getItem("radar.track") || "{}") || {} } ca
 const saveTrack = () => { try { localStorage.setItem("radar.track", JSON.stringify(track)) } catch (e) {} };
 
 /* ---------- masthead, headline, figures ---------- */
-const fmtDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d || ""); return m ? `${m[3]}.${m[2]}.${m[1]}` : d };
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const fmtDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(d || ""); return !m ? d : EN ? `${+m[3]} ${MONTHS[m[2] - 1]} ${m[1]}` : `${m[3]}.${m[2]}.${m[1]}` };
 const last = rows.map(r => r.checked).filter(Boolean).sort().pop();
-$("checked").textContent = last ? "Stand " + fmtDate(last) : "";
-$("headline").append(el("em", "", String(open.length)), ` von ${rows.length} Companies haben gerade offene Internships.`);
+$("checked").textContent = last ? L("Stand ", "Updated ") + fmtDate(last) : "";
+$("headline").append(el("em", "", String(open.length)), L(` von ${rows.length} Companies haben gerade offene Internships.`, ` of ${rows.length} companies have open internships right now.`));
 const fig = (n, label) => { const d = el("div"); d.append(el("dt", "cap", label), el("dd", "", String(n))); return d };
 $("figs").append(
-  fig(rows.reduce((s, r) => s + r.n, 0), "Passende Stellen"),
-  fig(open.filter(r => r.st === "new").length, "Neu seit letztem Scan"),
-  fig(open.filter(r => r.li === 0).length, "In München"),
-  fig(open.filter(r => r.gi <= 1).length, "Bei S+ und S Companies"));
+  fig(rows.reduce((s, r) => s + r.n, 0), L("Passende Stellen", "Matching roles")),
+  fig(open.filter(r => r.st === "new").length, L("Neu seit letztem Scan", "New since last scan")),
+  fig(open.filter(r => r.li === 0).length, L("In München", "In Munich")),
+  fig(open.filter(r => r.gi <= 1).length, L("Bei S+ und S Companies", "At S+ and S companies")));
 
-const THEMES = [["auto", "Auto"], ["light", "Hell"], ["dark", "Dunkel"]];
+const THEMES = [["auto", "Auto"], ["light", L("Hell", "Light")], ["dark", L("Dunkel", "Dark")]];
 let theme = document.documentElement.getAttribute("data-theme") || "auto";
-const showTheme = () => { $("theme").textContent = "Darstellung · " + (THEMES.find(t => t[0] === theme) || THEMES[0])[1] };
+const showTheme = () => { $("theme").textContent = L("Darstellung · ", "Theme · ") + (THEMES.find(t => t[0] === theme) || THEMES[0])[1] };
 $("theme").onclick = () => {
   theme = THEMES[(THEMES.findIndex(t => t[0] === theme) + 1) % THEMES.length][0];
   if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
@@ -345,6 +364,16 @@ $("theme").onclick = () => {
   showTheme();
 };
 showTheme();
+
+$("lang").querySelector(`[data-l="${EN ? "en" : "de"}"]`).className = "on";
+$("lang").onclick = () => {
+  const next = EN ? "de" : "en";
+  try { localStorage.setItem("radar.lang", next) } catch (e) {}
+  // keep the choice in the link as well, so an English link can be shared
+  if (next === "en") location.hash = "en";
+  else try { history.replaceState(null, "", location.pathname + location.search) } catch (e) { location.hash = "de" }
+  location.reload();
+};
 
 /* ---------- filter state ---------- */
 const F = { loc: new Set(), grade: new Set(), kind: new Set(), view: new Set(), q: "", sort: "loc" };
@@ -357,10 +386,10 @@ function pass(r, skip) {
   return !F.q || r.hay.includes(F.q);
 }
 const FACETS = [
-  { id: "loc", label: "Standort", opts: usedLocs.map(i => [i, locName(i)]) },
+  { id: "loc", label: L("Standort", "Location"), opts: usedLocs.map(i => [i, locName(i)]) },
   { id: "grade", label: "Tier", opts: usedGrades.filter(i => i < GRADES.length || open.some(r => r.gi === i)).map(i => [i, gradeName(i)]) },
-  { id: "kind", label: "Art", opts: [["Praktikum", "Praktikum"], ["Werkstudent", "Werkstudent"]] },
-  { id: "view", label: "Ansicht", opts: [["new", "Nur neue"], ["saved", "Gemerkt"], ["todo", "Noch nicht beworben"]] },
+  { id: "kind", label: L("Art", "Type"), opts: [["Praktikum", kindName("Praktikum")], ["Werkstudent", kindName("Werkstudent")]] },
+  { id: "view", label: L("Ansicht", "Show"), opts: [["new", L("Nur neue", "New only")], ["saved", L("Gemerkt", "Saved")], ["todo", L("Noch nicht beworben", "Not applied yet")]] },
 ].filter(f => f.opts.length > 1);
 const chips = [];
 for (const f of FACETS) {
@@ -396,7 +425,7 @@ for (const g of usedGrades) {
     const d = btn("dot" + (r.open ? " on" : "")); d.tabIndex = -1;
     if (r.open) d.style.setProperty("--c", `var(--l${r.li})`);
     d.onmouseenter = () => hint.replaceChildren(el("b", "", r.company),
-      r.open ? ` · ${plural(r.n, "Stelle", "Stellen")} · ${locName(r.li)}` : r.st === "gone" ? " · nicht mehr gelistet" : " · keine Treffer");
+      r.open ? ` · ${roles(r.n)} · ${locName(r.li)}` : r.st === "gone" ? L(" · nicht mehr gelistet", " · no longer listed") : L(" · keine Treffer", " · no matches"));
     d.onmouseleave = () => hint.replaceChildren();
     d.onclick = () => r.open ? jumpTo(r) : findInRegister(r.company);
     dots.push([r, d]); box.append(d);
@@ -424,10 +453,10 @@ function findInRegister(name) { $("rq").value = name; setReg("all"); $("h-reg").
     const ul = el("ul"); for (const r of list) { const li = el("li"); li.append(item(r)); ul.append(li) } c.append(ul); return c;
   };
   $("digest").append(
-    col("Neu", fresh, r => { const b = btn("", r.company); b.onclick = () => jumpTo(r); return b }, "Nichts Neues."),
-    col("Nicht mehr gelistet", gone, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), "Nichts weggefallen."),
-    col("Nicht geprüft", err, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), "Alle Scans liefen durch."));
-  if (err.length) $("digest").lastChild.append(el("small", "", "Scan fehlgeschlagen, gezeigt wird der letzte bekannte Stand."));
+    col(L("Neu", "New"), fresh, r => { const b = btn("", r.company); b.onclick = () => jumpTo(r); return b }, L("Nichts Neues.", "Nothing new.")),
+    col(L("Nicht mehr gelistet", "No longer listed"), gone, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), L("Nichts weggefallen.", "Nothing was removed.")),
+    col(L("Nicht geprüft", "Not checked"), err, r => safeUrl(r.board) ? link(r.board, r.company) : el("span", "", r.company), L("Alle Scans liefen durch.", "Every scan went through.")));
+  if (err.length) $("digest").lastChild.append(el("small", "", L("Scan fehlgeschlagen, gezeigt wird der letzte bekannte Stand.", "The scan failed, so this shows the last known state.")));
 })();
 
 /* ---------- listings ---------- */
@@ -439,28 +468,28 @@ const ORDER = {
 function jobRow(r) {
   const job = el("article", "job" + (track[r.key] === "applied" ? " applied" : "")); job.id = "job-" + r.i;
   const who = el("div", "who"); who.append(el("h3", "co", r.company));
-  who.append(el("span", "st" + (r.st === "new" ? " new" : ""), r.st === "new" ? "Neu" : r.st === "open" ? "Weiterhin offen" : ""));
+  who.append(el("span", "st" + (r.st === "new" ? " new" : ""), r.st === "new" ? L("Neu", "New") : r.st === "open" ? L("Weiterhin offen", "Still open") : ""));
   const role = el("div", "role"), m = el("div", "m"), b = safeUrl(r.board), u = safeUrl(r.url);
-  role.append(el("div", "t", r.title || "Stelle ohne Titel"));
-  m.append(r.kind);
-  if (r.n > 1) { m.append(" · "); const more = `${plural(r.n - 1, "weitere Stelle", "weitere Stellen")}`; m.append(b ? link(b, more + " ↗", "lnk") : more) }
+  role.append(el("div", "t", r.title || L("Stelle ohne Titel", "Untitled role")));
+  m.append(kindName(r.kind));
+  if (r.n > 1) { m.append(" · "); const more = `${plural(r.n - 1, L("weitere Stelle", "more role"), L("weitere Stellen", "more roles"))}`; m.append(b ? link(b, more + " ↗", "lnk") : more) }
   role.append(m);
   const where = el("div", "where"), wm = el("div", "m");
-  wm.append(sw(r.li), locName(r.li)); where.append(el("div", "", r.loc || "Ort unbekannt"), wm);
+  wm.append(sw(r.li), locName(r.li)); where.append(el("div", "", r.loc || L("Ort unbekannt", "Location unknown")), wm);
   const acts = el("div", "acts");
-  for (const [state, label] of [["saved", "Merken"], ["applied", "Beworben"]]) {
+  for (const [state, label] of [["saved", L("Merken", "Save")], ["applied", L("Beworben", "Applied")]]) {
     const k = btn("mk", label); k.setAttribute("aria-pressed", String(track[r.key] === state));
     k.onclick = () => { if (track[r.key] === state) delete track[r.key]; else track[r.key] = state; saveTrack(); render() };
     acts.append(k);
   }
-  if (u || b) acts.append(link(u || b, u ? "Öffnen ↗" : "Karriereseite ↗", "go"));
+  if (u || b) acts.append(link(u || b, u ? L("Öffnen ↗", "Open ↗") : L("Karriereseite ↗", "Careers page ↗"), "go"));
   job.append(el("span", "grade", gradeName(r.gi)), who, role, where, acts);
   return job;
 }
 function render() {
   const shown = open.filter(r => pass(r)).sort(ORDER[F.sort]);
   const list = $("list"); list.replaceChildren();
-  if (!shown.length) list.append(el("p", "empty", open.length ? "Keine Stelle passt zu diesen Filtern." : "Im letzten Scan war keine offene Stelle dabei."));
+  if (!shown.length) list.append(el("p", "empty", open.length ? L("Keine Stelle passt zu diesen Filtern.", "No role matches these filters.") : L("Im letzten Scan war keine offene Stelle dabei.", "The last scan didn’t find any open roles.")));
   let group = null;
   for (const r of shown) {
     const g = F.sort === "loc" ? r.li : F.sort === "grade" ? r.gi : null;
@@ -480,8 +509,8 @@ function render() {
   }
   const some = active();
   for (const [r, d] of dots) d.classList.toggle("dim", some && !(r.open && pass(r)));
-  const sum = $("sum"); sum.replaceChildren(el("b", "num", plural(shown.length, "Company", "Companies")),
-    ` · ${plural(shown.reduce((s, r) => s + Math.max(r.n, 1), 0), "Stelle", "Stellen")}`);
+  const sum = $("sum"); sum.replaceChildren(el("b", "num", plural(shown.length, L("Company", "company"), L("Companies", "companies"))),
+    ` · ${roles(shown.reduce((s, r) => s + Math.max(r.n, 1), 0))}`);
   $("reset").hidden = !some;
 }
 
@@ -492,14 +521,14 @@ function renderReg() {
   const q = $("rq").value.trim().toLowerCase(), ul = $("reg"); ul.replaceChildren();
   const shown = regRows.filter(r => r.company.toLowerCase().includes(q) &&
     (regFilter === "all" || (regFilter === "open" && r.open) || (regFilter === "none" && !r.open) || (regFilter === "nolink" && !safeUrl(r.board))));
-  $("regcount").textContent = `${shown.length} von ${rows.length}`;
-  if (!shown.length) { const li = el("li"); li.append(el("span"), el("span", "rs", "Keine Company passt zu dieser Auswahl.")); ul.append(li); return }
+  $("regcount").textContent = `${shown.length} ${L("von", "of")} ${rows.length}`;
+  if (!shown.length) { const li = el("li"); li.append(el("span"), el("span", "rs", L("Keine Company passt zu dieser Auswahl.", "No company matches this selection."))); ul.append(li); return }
   for (const r of shown) {
     const li = el("li"), b = safeUrl(r.board), rl = el("span", "rl");
-    if (b) rl.append(link(b, atsName(b) + " ↗")); else rl.textContent = "kein Link";
+    if (b) rl.append(link(b, atsName(b) + " ↗")); else rl.textContent = L("kein Link", "no link");
     li.append(el("span", "grade", gradeName(r.gi)), el("span", "rc", r.company), rl,
-      el("span", "rs" + (r.open ? " open" : ""), r.open ? `${plural(r.n, "offene Stelle", "offene Stellen")} · ${locName(r.li)}`
-        : r.st === "gone" ? "nicht mehr gelistet" : r.st === "error" ? "Scan fehlgeschlagen" : "keine Treffer"));
+      el("span", "rs" + (r.open ? " open" : ""), r.open ? `${plural(r.n, L("offene Stelle", "open role"), L("offene Stellen", "open roles"))} · ${locName(r.li)}`
+        : r.st === "gone" ? L("nicht mehr gelistet", "no longer listed") : r.st === "error" ? L("Scan fehlgeschlagen", "scan failed") : L("keine Treffer", "no matches")));
     ul.append(li);
   }
 }
