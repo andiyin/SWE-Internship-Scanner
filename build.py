@@ -15,6 +15,7 @@ import io
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -39,12 +40,27 @@ def to_int(value):
         return 0
 
 
+def wait_until_settled(path, quiet=2.0, timeout=60.0):
+    """Waits until the file exists and has not changed for `quiet` seconds, so a
+    CSV that is still being written is not picked up half finished."""
+    deadline = time.monotonic() + timeout
+    last = None
+    while time.monotonic() < deadline:
+        try:
+            stat = path.stat()
+            now = (stat.st_mtime, stat.st_size)
+        except FileNotFoundError:
+            now = None
+        if now is not None and now == last:
+            return
+        last = now
+        time.sleep(quiet)
+    raise SystemExit(f"{path.name} did not settle within {timeout:.0f}s")
+
+
 def build(csv_path=None):
     csv_path = Path(csv_path) if csv_path else source_csv()
     raw = csv_path.read_bytes()
-    if csv_path.resolve() != DEFAULT_CSV.resolve() and (not DEFAULT_CSV.exists() or DEFAULT_CSV.read_bytes() != raw):
-        DEFAULT_CSV.write_bytes(raw)
-
     rows = []
     for r in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"), newline="")):
         company = (r.get("Company") or "").strip()
@@ -65,6 +81,11 @@ def build(csv_path=None):
             }
         )
 
+    if not rows:
+        raise SystemExit(f"{csv_path.name} has no rows with a Company column, not building")
+    if csv_path.resolve() != DEFAULT_CSV.resolve() and (not DEFAULT_CSV.exists() or DEFAULT_CSV.read_bytes() != raw):
+        DEFAULT_CSV.write_bytes(raw)
+
     data = json.dumps(rows, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     template = (HERE / "template.html").read_text(encoding="utf-8")
     head, body = template.replace("/*__DATA__*/[]", data).split("<!--BODY-->")
@@ -82,5 +103,9 @@ def build(csv_path=None):
 
 
 if __name__ == "__main__":
-    total, with_jobs = build(sys.argv[1] if len(sys.argv) > 1 else None)
+    args = [a for a in sys.argv[1:] if a != "--settle"]
+    path = Path(args[0]) if args else source_csv()
+    if "--settle" in sys.argv:
+        wait_until_settled(path)
+    total, with_jobs = build(path)
     print(f"{total} companies, {with_jobs} with open internships -> dashboard.html")

@@ -38,6 +38,14 @@ The hosted site is rebuilt by Vercel on every push. To publish new data:
 
 It commits the CSV if it changed and pushes it.
 
+On macOS this can run by itself. This installs a small background job that watches the CSV and runs `publish.sh` as soon as the file is changed or replaced:
+
+```bash
+./install-watcher.sh
+```
+
+`./install-watcher.sh remove` turns it off again.
+
 The CSV needs these columns:
 
 `Tier, Company, Status, Position Title, Location, Location Tier, Direct Job URL, Career/Board URL, All Current Matches (count), Last Checked, Notes`
@@ -49,6 +57,7 @@ The CSV needs these columns:
 - `build.py` – reads the CSV and writes `dashboard.html`
 - `serve.py` – local server that rebuilds when the CSV changes
 - `start.sh` / `publish.sh` – start locally / push new data
+- `install-watcher.sh` – publish automatically when the CSV changes (macOS)
 - `vercel.json` – build settings for Vercel
 
 ## Notes
