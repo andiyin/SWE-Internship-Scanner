@@ -1,4 +1,4 @@
-<title>Internship Radar</title>
+<title>Internship Scanner</title>
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23131518'/%3E%3Crect x='4' y='4' width='8' height='8' fill='%23f3f3f0'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -204,7 +204,7 @@ try { const t = localStorage.getItem("radar.theme"); if (t === "light" || t === 
 <!--BODY-->
 <div class="sheet">
   <header class="mast">
-    <span class="mark">Internship Radar<span class="by" data-en="by Andi Yin">von Andi Yin</span></span>
+    <span class="mark">Internship Scanner<span class="by" data-en="by Andi Yin">von Andi Yin</span></span>
     <div class="mast-r">
       <span class="cap" id="checked"></span>
       <button id="lang" type="button" aria-label="Sprache wechseln" data-en-label="Switch language"><span data-l="de">DE</span> / <span data-l="en">EN</span></button>
@@ -369,6 +369,9 @@ $("lang").querySelector(`[data-l="${EN ? "en" : "de"}"]`).className = "on";
 $("lang").onclick = () => {
   const next = EN ? "de" : "en";
   try { localStorage.setItem("radar.lang", next) } catch (e) {}
+  // the page reloads to switch language, so hand the current filters over to the next load
+  try { sessionStorage.setItem("radar.state", JSON.stringify({ loc: [...F.loc], grade: [...F.grade], kind: [...F.kind], view: [...F.view],
+    q: $("q").value, sort: F.sort, reg: regFilter, rq: $("rq").value, y: window.scrollY })) } catch (e) {}
   // keep the choice in the link as well, so an English link can be shared
   if (next === "en") location.hash = "en";
   else try { history.replaceState(null, "", location.pathname + location.search) } catch (e) { location.hash = "de" }
@@ -540,5 +543,22 @@ function setReg(f) {
 $("rseg").onclick = e => { const b = e.target.closest("button"); if (b) setReg(b.dataset.f) };
 $("rq").oninput = renderReg;
 
-render(); renderReg();
+// restore filters handed over by a language switch
+let restoredY = null;
+try {
+  const s = JSON.parse(sessionStorage.getItem("radar.state") || "null");
+  sessionStorage.removeItem("radar.state");
+  if (s) {
+    for (const id of ["loc", "grade", "kind", "view"]) for (const v of s[id] || []) F[id].add(v);
+    $("q").value = s.q || ""; F.q = $("q").value.trim().toLowerCase();
+    if (ORDER[s.sort]) F.sort = s.sort;
+    $("sort").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.s === F.sort)));
+    $("rq").value = s.rq || "";
+    if (["all", "open", "none", "nolink"].includes(s.reg)) regFilter = s.reg;
+    restoredY = s.y;
+  }
+} catch (e) {}
+
+render(); setReg(regFilter);
+if (restoredY) window.scrollTo({ top: restoredY, behavior: "instant" });
 </script>
